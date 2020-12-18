@@ -2,27 +2,6 @@ ECOB2000 Final Project
 ================
 Patrick Sinclair
 
-    ## Warning in cbind(InitCAbsentee$COMBOKEY, InitEnrollment$COMBOKEY): number of
-    ## rows of result is not a multiple of vector length (arg 1)
-
-    ## # A tibble: 89,204 x 11
-    ##    COMBOKEY SCH_FTETEACH_TOT SCH_FTETEACH_CE~ SCH_FTETEACH_NO~ SCH_FTETEACH_FY
-    ##    <chr>               <dbl>            <dbl>            <dbl>           <dbl>
-    ##  1 0100005~            39.3             39.3                 0               2
-    ##  2 0100005~            78.2             71.2                 7               6
-    ##  3 0100005~            41.4             41.4                 0               8
-    ##  4 0100005~            52.8             52.8                 0               5
-    ##  5 0100005~            29.4             29.4                 0               1
-    ##  6 0100005~            71.0             71.0                 0               7
-    ##  7 0100006~            18.2             18.2                 0               0
-    ##  8 0100006~            32               31                   1               1
-    ##  9 0100006~             7.65             7.65                0               0
-    ## 10 0100006~            24.3             24.3                 0               3
-    ## # ... with 89,194 more rows, and 6 more variables: SCH_FTETEACH_SY <dbl>,
-    ## #   SCH_FTETEACH_ABSENT <dbl>, SCH_FTECOUNSELORS <dbl>,
-    ## #   SCH_FTESERVICES_NUR <dbl>, SCH_FTESERVICES_PSY <dbl>,
-    ## #   SCH_FTESERVICES_SOC <dbl>
-
 ### Introduction
 
 #### Literature Review
@@ -1012,22 +991,8 @@ LEPProp
 
 </table>
 
-    ## The following object is masked _by_ .GlobalEnv:
-    ## 
-    ##     frpl
-
 ![](FProjv2_files/figure-gfm/OLS%20Plots-1.png)<!-- -->
-
-    ## The following object is masked _by_ .GlobalEnv:
-    ## 
-    ##     frpl
-
 ![](FProjv2_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
-
-    ## The following object is masked _by_ .GlobalEnv:
-    ## 
-    ##     frpl
-
 ![](FProjv2_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 **LASSO**

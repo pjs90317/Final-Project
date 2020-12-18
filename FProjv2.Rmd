@@ -29,8 +29,8 @@ redpricelunch <- subset(initFRPL, freelunch != TRUE)
 freelunch$redprice <- redpricelunch$STUDENT_COUNT
 freelunch$totalfrpl <- (freelunch$STUDENT_COUNT + freelunch$redprice)
 ```
-```{r creating crossed checks obs, echo = FALSE}
-frplcompCOMBOKEY <- cbind(InitCAbsentee$COMBOKEY, InitEnrollment$COMBOKEY)
+```{r creating crossed checks obs, echo = FALSE, include = FALSE}
+frplcompCOMBOKEY <- suppressWarnings(cbind(InitCAbsentee$COMBOKEY, InitEnrollment$COMBOKEY))
 cabscombo <- table(frplcompCOMBOKEY[1:92437,1])
 a = as.data.frame(cabscombo)
 a <- a%>%
@@ -38,10 +38,10 @@ a <- a%>%
 frplCOMBO <- left_join(freelunch, a, by="COMBOKEY")
 frplCOMBO$Freq[is.na(frplCOMBO$Freq)] <- 0
 # sum(frplCOMBO$Freq == 1)
-frpl <- subset(frplCOMBO, Freq != 0)
-frplcomp <- data.frame(frpl$COMBOKEY, frpl$Freq)
+frpldf <- subset(frplCOMBO, Freq != 0)
+frplcomp <- data.frame(frpldf$COMBOKEY, frpldf$Freq)
 frplcomp <- frplcomp %>%
-  rename(COMBOKEY = frpl.COMBOKEY, Freq = frpl.Freq)
+  rename(COMBOKEY = frpldf.COMBOKEY, Freq = frpldf.Freq)
 enrol <- left_join(InitEnrollment, frplcomp, by = "COMBOKEY")
 enrol$Freq[is.na(enrol$Freq)] <- 0
 # sum(enrol$Freq == 1)
@@ -101,11 +101,11 @@ dualenrol <- subset(Dual_Enrollment, Freq != 0)
 enrolcomp <- data.frame(enrol$COMBOKEY, enrol$Freq)
 enrolcomp <- enrolcomp %>%
   rename(COMBOKEY = enrol.COMBOKEY, Freq = enrol.Freq)
-frpl = select(frpl, -21)
-frpl <- left_join(frpl, enrolcomp, by="COMBOKEY")
-frpl$Freq[is.na(frpl$Freq)] <- 0
+frpldf = select(frpldf, -21)
+frpldf <- left_join(frpldf, enrolcomp, by="COMBOKEY")
+frpldf$Freq[is.na(frpldf$Freq)] <- 0
 # sum(frpl$Freq == 1)
-frpl <- subset(frpl, Freq != 0)
+frpldf <- subset(frpldf, Freq != 0)
 # write.csv(frpl, "UseFRPL.csv")
 ```
 ```{r Matching CAbsenteeism, echo = FALSE}
@@ -136,7 +136,7 @@ enrol$EWTTL <- (enrol$EWF + enrol$EWM)
 enrol$EHPTTL <- (enrol$EHPM + enrol$EHPF)
 enrol$ETRTTL <- (enrol$ETRF + enrol$ETRM)
 enrol$EDISABTTL <- (enrol$SCH_ENR_504_M + enrol$SCH_ENR_504_F + enrol$SCH_ENR_IDEA_M + enrol$SCH_ENR_IDEA_F)
-enrol$frpl <- frpl$totalfrpl
+enrol$frpl <- frpldf$totalfrpl
 gt$TOT_GTENR_M[gt$TOT_GTENR_M < 0] <- 0
 gt$TOT_GTENR_F[gt$TOT_GTENR_F < 0] <- 0
 dualenrol$TOT_DUAL_M[dualenrol$TOT_DUAL_M < 0] <- 0
@@ -148,7 +148,7 @@ useData <- enrol
 ```{r Adding Variables from Other Datasets to useData, echo = FALSE}
 schsup2 <- schsup %>%
   select(c(7, 9:13, 16:17, 20:22))
-schsup2
+# schsup2
 useData <- left_join(useData, schsup2, by = "COMBOKEY")
 schexp2 <- schexp %>%
   select(c(7, 19, 23, 25:27))
@@ -203,7 +203,7 @@ useData3$AvgTeachSalNorm <- norm_varb(useData3$AvgTeachSal)
 useData3$TeachSupSalPropNorm <- norm_varb(useData3$TeachSupSalProp)
 # write.csv(useData3, "FormData2.csv")
 # summary(useData3)
-save(useData3, file="CleanedData.RData")
+# save(useData3, file="CleanedData.RData")
 ```
 ### Introduction
 
@@ -301,9 +301,10 @@ absentcoefs <- kable(summary(absent1)$coef, digits=3)
 absentcoefs
 ```
 ```{r OLS Plots, echo = FALSE}
-attach(graphset)
+options(warn = -1)
 # png(filename = "./EMinPropOLS.png")
 plot(AbsentProp ~ jitter(EMinProp, factor = 0.0), pch = 15, col = rgb(0.5, 0.8, 0, alpha = 0.8), ylim = c(0,1), xlim = c(0,1), xlab = "Minority Proportion", data = graphset)
+attach(graphset)
 abspredict <- data.frame(AvgTeachSalNorm = 0.0015, TeachInexp = 0.5, SPED, Alternative, Magnet, Charter, PPE = 7500, ETOTAL = 250, PupilTeachRatio = 15, (EMinProp >= 0.2 & EMinProp <= 0.8), frplProp = 0.05, LEPProp = 0.1, TeachSupSalPropNorm = 0.05)
 abspredict$yhat <- predict(absent1, newdata = abspredict)
 lines(yhat ~ EMinProp, data = abspredict, col = "Purple" )
@@ -312,9 +313,10 @@ legend("topleft", "Minority Regression", col = "Purple", lty = 1, bty = "n")
 detach()
 ```
 ```{r echo = FALSE}
-attach(graphset)
+options(warn = -1)
 # png(filename = "./FRPLPropOLS.png")
 plot(AbsentProp ~ jitter(frplProp, factor = 0.0), pch = 15, col = rgb(0.5, 0.8, 0, alpha = 0.8), ylim = c(0,1), xlim = c(0,1), xlab="FRPL Prop", data = graphset)
+attach(graphset)
 abspredictfrpl <- data.frame(AvgTeachSalNorm = 0.0015, TeachInexp = 0.5, SPED, Alternative, Magnet, Charter, PPE = 7500, ETOTAL = 250, PupilTeachRatio = 15, EMinProp = 0.5, (frplProp >= 0.1 & frplProp <= 0.9), LEPProp = 0.1, TeachSupSalPropNorm = 0.05)
 abspredictfrpl$yhat <- predict(absent1, newdata = abspredictfrpl)
 lines(yhat ~ frplProp, data = abspredictfrpl, col = "Blue")
@@ -323,14 +325,14 @@ legend("topleft", "Free and Reduced Price Lunch RL", col = "Blue", lty = 1, bty 
 detach()
 ```
 ```{r echo = FALSE}
-attach(graphset)
+options(warn = -1)
 # png(filename = "./TeachInexpOLS.png")
 plot(AbsentProp ~ jitter(TeachInexp, factor = 0.0), pch = 15, col = rgb(0.5, 0.8, 0, alpha = 0.8), ylim = c(0,1), xlim = c(0,1), xlab="Inexperienced Teacher Proportion", data = graphset)
+attach(graphset)
 abspredictinexp <- data.frame(AvgTeachSalNorm = 0.0015, (TeachInexp >= 0.05 & TeachInexp <= 1), SPED, Alternative, Magnet, Charter, PPE = 6500, ETOTAL = 250, PupilTeachRatio = 15, EMinProp = 0.5, frplProp = 0.05, LEPProp = 0.1, TeachSupSalPropNorm = 0.05)
 abspredictinexp$yhat <- predict(absent1, newdata = abspredictinexp)
 lines(yhat ~ TeachInexp, data = abspredictinexp, col = "Red")
 legend("topleft", "Teacher Inexperience Ration RL", col = "Red", lty = 1, bty = "n")
-# dev.off()
 detach()
 ```
 
