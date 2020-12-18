@@ -3,7 +3,7 @@ title: ECOB2000 Final Project
 author: Patrick Sinclair
 output: github_document
 ---
-```{r setup, echo=FALSE}
+```{r setup, echo=FALSE, include = FALSE}
 require("knitr")
 opts_knit$set(root.dir = "~/CCNY/Econometrics/Homework/Draft Hwk Files/Final Project/Final-Project")
 library(readr)
@@ -291,13 +291,14 @@ graphset <- subset(useData3, graphobs)
 #graphset$Alternative <- as.factor(graphset$Alternative)
 ```
 **OLS**
-```{r Initial OLS Regression}
+```{r Initial OLS Regression, echo = FALSE}
 absent1 <- lm(AbsentProp ~ AvgTeachSalNorm + TeachInexp + SPED + Alternative + Magnet + Charter + PPE + TeachSupSalPropNorm + ETOTAL + PupilTeachRatio + EMinProp + frplProp + LEPProp, data = useData3)
-summary(absent1)
+# summary(absent1)
 # stargazer(absent1, type = "text")
-plot(absent1)
+# plot(absent1)
 absentcoefs <- kable(summary(absent1)$coef, digits=3)
 # save_kable(absentcoefs, file = "AbsentOLSCoefs.png")
+absentcoefs
 ```
 ```{r OLS Plots, echo = FALSE}
 attach(graphset)
@@ -310,7 +311,7 @@ legend("topleft", "Minority Regression", col = "Purple", lty = 1, bty = "n")
 # dev.off()
 detach()
 ```
-```{r}
+```{r echo = FALSE}
 attach(graphset)
 # png(filename = "./FRPLPropOLS.png")
 plot(AbsentProp ~ jitter(frplProp, factor = 0.0), pch = 15, col = rgb(0.5, 0.8, 0, alpha = 0.8), ylim = c(0,1), xlim = c(0,1), xlab="FRPL Prop", data = graphset)
@@ -321,7 +322,7 @@ legend("topleft", "Free and Reduced Price Lunch RL", col = "Blue", lty = 1, bty 
 # dev.off()
 detach()
 ```
-```{r}
+```{r echo = FALSE}
 attach(graphset)
 # png(filename = "./TeachInexpOLS.png")
 plot(AbsentProp ~ jitter(TeachInexp, factor = 0.0), pch = 15, col = rgb(0.5, 0.8, 0, alpha = 0.8), ylim = c(0,1), xlim = c(0,1), xlab="Inexperienced Teacher Proportion", data = graphset)
@@ -334,7 +335,7 @@ detach()
 ```
 
 **LASSO**
-```{r Standardize Data and Lasso Regression, echo = FALSE}
+```{r Standardize Data and Lasso Regression, echo = FALSE, include = FALSE}
 dat_for_lasso <- data.frame(
   useData3$AbsentProp,
   useData3$AvgTeachSalNorm,
@@ -400,7 +401,7 @@ vip(cvmodel1_lasso, num_features = 50, geom = "col")
 lassocoefs <- kable(vnat, digits=3)
 # save_kable(lassocoefs, file = "LassoCoefs.png")
 ```
-```{r OLS Lasso Remove Varb, echo = FALSE}
+```{r OLS Lasso Remove Varb, echo = FALSE, include = FALSE}
 absentlassoremove <- lm(AbsentProp ~ AvgTeachSalNorm + TeachInexp + SPED + Alternative + PPE + TeachSupSalPropNorm + ETOTAL + PupilTeachRatio + EMinProp + frplProp + LEPProp, data = useData3)
 summary(absentlassoremove)
 # stargazer(absent1, type = "text")
@@ -408,7 +409,7 @@ plot(absentlassoremove)
 absentremovecoefs <- kable(summary(absentlassoremove)$coef, digits=3)
 # save_kable(absentremovecoefs, file = "AbsentRemoveOLSCoefs.png")
 ```
-```{r OLS Interactions, echo = FALSE}
+```{r OLS Interactions, echo = FALSE, include = FALSE}
 absentinteract <- lm(AbsentProp ~ (AvgTeachSalNorm*SPED) + (TeachInexp*SPED) + (PPE*SPED) + (TeachSupSalPropNorm*SPED) + (ETOTAL*SPED) + (PupilTeachRatio*SPED) + (EMinProp*SPED) + (frplProp*SPED) + (LEPProp*SPED) + (AvgTeachSalNorm*Alternative) + (TeachInexp*Alternative) + (PPE*Alternative) + (TeachSupSalPropNorm*Alternative) + (ETOTAL*Alternative) + (PupilTeachRatio*Alternative) + (EMinProp*Alternative) + (frplProp*Alternative) + (LEPProp*Alternative), data = useData3)
 summary(absentinteract)
 plot(absentinteract)
