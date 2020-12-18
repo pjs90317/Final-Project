@@ -1,0 +1,419 @@
+---
+title: ECOB2000 Final Project
+author: Patrick Sinclair
+output: github_document
+---
+```{r setup, echo=FALSE}
+require("knitr")
+opts_knit$set(root.dir = "~/CCNY/Econometrics/Homework/Draft Hwk Files/Final Project/Final-Project")
+library(readr)
+library(dplyr)
+library(AER)
+library(stargazer)
+library(knitr)
+library(kableExtra)
+load("InitFPData.RData")
+```
+```{r FRPL Manipulation, echo = FALSE}
+# Manipulating FRPL Data to ascertain total counts; adding to data later as proxy for proportion of students from low socioeconomic background
+InitFRPL <- InitFRPL %>%
+  rename(COMBOKEY = NCESSCH)
+# remove Missing and NA values
+initFRPL <- subset(InitFRPL, (LUNCH_PROGRAM == "Free lunch qualified")  | (LUNCH_PROGRAM == "Reduced-price lunch qualified")) 
+# extra column to manipulate free lunch status
+initFRPL$freelunch <- initFRPL$LUNCH_PROGRAM == "Free lunch qualified"
+# create 2 subsets to separate the varible
+freelunch <- subset(initFRPL, freelunch == TRUE)
+redpricelunch <- subset(initFRPL, freelunch != TRUE)
+# combine free lunch and reduced price variables to obtain total number of students eligible for the program
+freelunch$redprice <- redpricelunch$STUDENT_COUNT
+freelunch$totalfrpl <- (freelunch$STUDENT_COUNT + freelunch$redprice)
+```
+```{r creating crossed checks obs, echo = FALSE}
+frplcompCOMBOKEY <- cbind(InitCAbsentee$COMBOKEY, InitEnrollment$COMBOKEY)
+cabscombo <- table(frplcompCOMBOKEY[1:92437,1])
+a = as.data.frame(cabscombo)
+a <- a%>%
+  rename(COMBOKEY = Var1)
+frplCOMBO <- left_join(freelunch, a, by="COMBOKEY")
+frplCOMBO$Freq[is.na(frplCOMBO$Freq)] <- 0
+# sum(frplCOMBO$Freq == 1)
+frpl <- subset(frplCOMBO, Freq != 0)
+frplcomp <- data.frame(frpl$COMBOKEY, frpl$Freq)
+frplcomp <- frplcomp %>%
+  rename(COMBOKEY = frpl.COMBOKEY, Freq = frpl.Freq)
+enrol <- left_join(InitEnrollment, frplcomp, by = "COMBOKEY")
+enrol$Freq[is.na(enrol$Freq)] <- 0
+# sum(enrol$Freq == 1)
+enrol <- subset(enrol, Freq!= 0)
+# write.csv(enrol, "UseEnrol.csv")
+```
+```{r Matching SchExp, echo = FALSE}
+schexp <- left_join(InitSchExp, frplcomp, by="COMBOKEY")
+schexp$Freq[is.na(schexp$Freq)] <- 0
+# sum(schexp$Freq == 1)
+schexp <- subset(schexp, Freq != 0)
+# write.csv(schexp, "UseSchExp.csv")
+```
+```{r Matching Retention, echo = FALSE}
+retention<- left_join(InitRetention, frplcomp, by="COMBOKEY")
+retention$Freq[is.na(retention$Freq)] <- 0
+# sum(retention$Freq == 1)
+retention <- subset(retention, Freq != 0)
+# write.csv(retention, "UseRetention.csv")
+```
+```{r Matching SchChar, echo = FALSE}
+schchar <- left_join(InitSchChar, frplcomp, by="COMBOKEY")
+schchar$Freq[is.na(schchar$Freq)] <- 0
+# sum(schchar$Freq == 1)
+schchar <- subset(schchar, Freq != 0)
+# write.csv(schchar, "UseSchChar.csv")
+```
+```{r Matching SchSup, echo = FALSE}
+schsup <- left_join(InitSchSup, frplcomp, by="COMBOKEY")
+schsup$Freq[is.na(schsup$Freq)] <- 0
+# sum(schsup$Freq == 1)
+schsup <- subset(schsup, Freq != 0)
+# write.csv(schsup, "UseSchSup.csv")
+```
+```{r Matching GT, echo = FALSE}
+gt <- left_join(InitGT, frplcomp, by="COMBOKEY")
+gt$Freq[is.na(gt$Freq)] <- 0
+# sum(gt$Freq == 1)
+gt <- subset(gt, Freq != 0)
+# write.csv(gt, "UseGT.csv")
+```
+```{r Matching Transfers, echo = FALSE}
+transfers <- left_join(InitTransfers, frplcomp, by="COMBOKEY")
+transfers$Freq[is.na(transfers$Freq)] <- 0
+# sum(transfers$Freq == 1)
+transfers <- subset(transfers, Freq != 0)
+# write.csv(transfers, "UseTransfers.csv")
+```
+```{r Matching Dual Enrollment, echo = FALSE}
+Dual_Enrollment <- left_join(InitDualEnrol, frplcomp, by="COMBOKEY")
+Dual_Enrollment$Freq[is.na(Dual_Enrollment$Freq)] <- 0
+# sum(Dual_Enrollment$Freq == 1)
+dualenrol <- subset(Dual_Enrollment, Freq != 0)
+# write.csv(dualenrol, "UseDualEnrol.csv")
+```
+```{r Matching FRPL, echo = FALSE}
+enrolcomp <- data.frame(enrol$COMBOKEY, enrol$Freq)
+enrolcomp <- enrolcomp %>%
+  rename(COMBOKEY = enrol.COMBOKEY, Freq = enrol.Freq)
+frpl = select(frpl, -21)
+frpl <- left_join(frpl, enrolcomp, by="COMBOKEY")
+frpl$Freq[is.na(frpl$Freq)] <- 0
+# sum(frpl$Freq == 1)
+frpl <- subset(frpl, Freq != 0)
+# write.csv(frpl, "UseFRPL.csv")
+```
+```{r Matching CAbsenteeism, echo = FALSE}
+InitCAbsentee$TOTAL <- (InitCAbsentee$TOTAL_STUDENTS_REPORTED_F + InitCAbsentee$TOTAL_STUDENTS_REPORTED_M)
+InitCAbsentee <- InitCAbsentee %>%
+  rename(TtlChronicAbsent = TOTAL)
+CAbsenteeism <- left_join(InitCAbsentee, enrolcomp, by="COMBOKEY")
+CAbsenteeism$Freq[is.na(CAbsenteeism$Freq)] <- 0
+# sum(CAbsenteeism$Freq == 1)
+CAbsenteeism <- subset(CAbsenteeism, Freq != 0)
+# write.csv(CAbsenteeism, "UseAbsenteeism.csv")
+# save(CAbsenteeism, dualenrol, enrol, frpl, gt, retention, schchar, schexp, schsup, transfers,  file="MatchedFPData.RData")
+detach()
+```
+```{r Compiling Data for Use, echo = FALSE}
+# load("MatchedFPData.RData")
+enrol$TtlChronicAbsent <- CAbsenteeism$TtlChronicAbsent
+# enrol = select(enrol, -124)
+enrol <- enrol %>%
+  rename(EASM = SCH_ENR_AS_M, EASF = SCH_ENR_AS_F, EHPM = SCH_ENR_HP_M, EHPF = SCH_ENR_HP_F, EBM = SCH_ENR_BL_M, EBF = SCH_ENR_BL_F, EWM = SCH_ENR_WH_M, EWF = SCH_ENR_WH_F, ETRM = SCH_ENR_TR_M, ETRF = SCH_ENR_TR_F, ETOTALF = TOT_ENR_F, ETOTALM = TOT_ENR_M, ELEPF = SCH_ENR_LEP_F, ELEPM = SCH_ENR_LEP_M, EHIF = SCH_ENR_HI_F, EHIM = SCH_ENR_HI_M, EAMF = SCH_ENR_AM_F, EAMM = SCH_ENR_AM_M, TCAB = TtlChronicAbsent)
+enrol$ETOTAL <- (enrol$ETOTALF + enrol$ETOTALM)
+enrol$ELEPTTL <- (enrol$ELEPF + enrol$ELEPM)
+enrol$EBTTL <- (enrol$EBF + enrol$EBM)
+enrol$EHITTL <- (enrol$EHIF + enrol$EHIM)
+enrol$EAMTTL <- (enrol$EAMF + enrol$EAMM)
+enrol$EASTTL <- (enrol$EASF + enrol$EASM)
+enrol$EWTTL <- (enrol$EWF + enrol$EWM)
+enrol$EHPTTL <- (enrol$EHPM + enrol$EHPF)
+enrol$ETRTTL <- (enrol$ETRF + enrol$ETRM)
+enrol$EDISABTTL <- (enrol$SCH_ENR_504_M + enrol$SCH_ENR_504_F + enrol$SCH_ENR_IDEA_M + enrol$SCH_ENR_IDEA_F)
+enrol$frpl <- frpl$totalfrpl
+gt$TOT_GTENR_M[gt$TOT_GTENR_M < 0] <- 0
+gt$TOT_GTENR_F[gt$TOT_GTENR_F < 0] <- 0
+dualenrol$TOT_DUAL_M[dualenrol$TOT_DUAL_M < 0] <- 0
+dualenrol$TOT_DUAL_F[dualenrol$TOT_DUAL_F < 0] <- 0
+enrol$AdvLearn <- (gt$TOT_GTENR_M + gt$TOT_GTENR_F + dualenrol$TOT_DUAL_F + dualenrol$TOT_DUAL_M)
+useData <- enrol
+# write.csv(useData, "UseDatav2.csv")
+```
+```{r Adding Variables from Other Datasets to useData, echo = FALSE}
+schsup2 <- schsup %>%
+  select(c(7, 9:13, 16:17, 20:22))
+schsup2
+useData <- left_join(useData, schsup2, by = "COMBOKEY")
+schexp2 <- schexp %>%
+  select(c(7, 19, 23, 25:27))
+useData <- left_join(useData, schexp2, by = "COMBOKEY")
+schchar$SCH_STATUS_ALT <- as.factor(schchar$SCH_STATUS_ALT)
+levels(schchar$SCH_STATUS_ALT) <- c(0,1)
+schchar$SCH_STATUS_SPED <- as.factor(schchar$SCH_STATUS_SPED)
+levels(schchar$SCH_STATUS_SPED) <- c(0,1)
+schchar$SCH_STATUS_MAGNET <- as.factor(schchar$SCH_STATUS_MAGNET)
+levels(schchar$SCH_STATUS_MAGNET) <- c(0,1)
+schchar$SCH_STATUS_CHARTER <- as.factor(schchar$SCH_STATUS_CHARTER)
+levels(schchar$SCH_STATUS_CHARTER) <- c(0,1)
+schchar2 <- schchar %>%
+  select(c(7, 27:30))
+useData <- left_join(useData, schchar2, by = "COMBOKEY")
+useData <- useData %>%
+  rename(FTETeach = SCH_FTETEACH_TOT, TeachCert = SCH_FTETEACH_CERT, TeachNCert = SCH_FTETEACH_NOTCERT, Teach1Y = SCH_FTETEACH_FY, Teach2Y = SCH_FTETEACH_SY, TeachAbsent = SCH_FTETEACH_ABSENT, Counselors = SCH_FTECOUNSELORS, Nurses = SCH_FTESERVICES_NUR, Psychologists = SCH_FTESERVICES_PSY, SocWorker = SCH_FTESERVICES_SOC, TeachSalary = SCH_SAL_TEACH_WFED, SupSalary = SCH_SAL_SUP_WFED, AdminSalary = SCH_SAL_ADM_WFED, PersExp = SCH_SAL_TOTPERS_WFED, NonPersExp = SCH_NPE_WFED, SPED = SCH_STATUS_SPED, Magnet = SCH_STATUS_MAGNET, Charter = SCH_STATUS_CHARTER, Alternative = SCH_STATUS_ALT)
+useData$ETTLMIN <- (useData$EAMTTL + useData$EASTTL + useData$EBTTL + useData$EHITTL + useData$EHPTTL + useData$ETRTTL)
+useData$EMinProp <- (useData$ETTLMIN/useData$ETOTAL)
+useData$EWProp <- (useData$EWTTL/useData$ETOTAL)
+useData$LEPProp <- (useData$ELEPTTL/useData$ETOTAL)
+useData$frplProp <- (useData$frpl/useData$ETOTAL)
+useData$DisabProp <- (useData$EDISABTTL/useData$ETOTAL)
+useData$AdvLearnProp <- (useData$AdvLearn/useData$ETOTAL)
+useData$PupilTeachRatio <- (useData$ETOTAL/useData$FTETeach)
+useData$TeachSupSalProp <- ((useData$TeachSalary+useData$SupSalary)/useData$PersExp)
+useData$NonPersPerExpRatio <- (useData$NonPersExp/useData$PersExp)
+useData$PPE <- ((useData$PersExp + useData$NonPersExp)/useData$ETOTAL)
+useData$SupTeachRatio <- ((useData$Counselors + useData$Nurses + useData$SocWorker + useData$Psychologists)/useData$FTETeach)
+useData$TeachInexp <- ((useData$Teach1Y + useData$Teach2Y)/useData$FTETeach)
+# write.csv(useData, "UseDatav2.csv")
+```
+```{r Excluding Missing Values and Problematic Obersvations, echo=FALSE}
+# table(useData$JJ == "Yes")
+useData <- subset(useData, JJ == "No")
+useData2 <- subset(useData, !(AdminSalary < 0 | SupSalary < 0 | ETOTAL < 0 | PersExp < 0 | SupSalary < 0 | AdminSalary < 0 | TeachCert < 0 | NonPersExp < 0 | TeachSalary < 0))
+useData2 <- subset(useData2, !(ETOTAL < 10 | FTETeach < 1))
+# write.csv(useData2, "FormData.csv")
+useData3 <- subset(useData2, (SupSalary > 0 & NonPersExp > 0 & TeachSalary > 0 & PersExp > 0))
+```
+```{r echo = FALSE}
+useData3 <- subset(useData3,!(ETOTAL < TCAB))
+useData3 <- subset(useData3, !(ETOTAL < frpl))
+```
+```{r echo = FALSE}
+useData3$AvgTeachSal <- (useData3$TeachSalary/useData3$FTETeach)
+useData3$AbsentProp <- (useData3$TCAB/useData3$ETOTAL)
+norm_varb <- function(X_in) {
+  (X_in - min(X_in, na.rm = TRUE))/( max(X_in, na.rm = TRUE) - min(X_in, na.rm = TRUE) )
+}
+useData3$AvgTeachSalNorm <- norm_varb(useData3$AvgTeachSal)
+useData3$TeachSupSalPropNorm <- norm_varb(useData3$TeachSupSalProp)
+# write.csv(useData3, "FormData2.csv")
+# summary(useData3)
+save(useData3, file="CleanedData.RData")
+```
+### Introduction
+
+#### Literature Review
+
+#### Data
+```{r Student Summary Statistics, echo = FALSE}
+Mean <- c(mean(useData3$ETOTAL), mean(useData3$AbsentProp), mean(useData3$PupilTeachRatio), mean(useData3$EMinProp), mean(useData3$frplProp), mean(useData3$LEPProp), mean(useData3$AvgTeachSal), mean(useData3$AvgTeachSalNorm), mean(useData3$PPE), mean(useData3$TeachInexp), mean(useData3$TeachSupSalPropNorm), mean(useData3$SupTeachRatio))
+SD <- c(sd(useData3$ETOTAL), sd(useData3$AbsentProp), sd(useData3$PupilTeachRatio), sd(useData3$EMinProp), sd(useData3$frplProp), sd(useData3$LEPProp), sd(useData3$AvgTeachSal), sd(useData3$AvgTeachSalNorm), sd(useData3$PPE), sd(useData3$TeachInexp), sd(useData3$TeachSupSalPropNorm), sd(useData3$SupTeachRatio))
+Min <- c(min(useData3$ETOTAL), min(useData3$AbsentProp), min(useData3$PupilTeachRatio), min(useData3$EMinProp), min(useData3$frplProp), min(useData3$LEPProp), min(useData3$AvgTeachSal), min(useData3$AvgTeachSalNorm), min(useData3$PPE), min(useData3$TeachInexp), min(useData3$TeachSupSalPropNorm), min(useData3$SupTeachRatio))
+Max <- c(max(useData3$ETOTAL), max(useData3$AbsentProp), max(useData3$PupilTeachRatio), max(useData3$EMinProp), max(useData3$frplProp), max(useData3$LEPProp), max(useData3$AvgTeachSal), max(useData3$AvgTeachSalNorm), max(useData3$PPE), max(useData3$TeachInexp), max(useData3$TeachSupSalPropNorm), max(useData3$SupTeachRatio))
+SD <- as.matrix(SD)
+Mean <- as.matrix(Mean)
+Min <- as.matrix(Min)
+Max <- as.matrix(Max)
+rownames(Mean) <- c("Total Enrollment", "Chronic Absent Proportion", "Pupil to Teacher Ratio", "Minority Proportion", "Free Lunch Program Proportion", "Limited English Proportion", "Average Teacher Salary", "Normalized Average Teacher Salary", "Per Pupil Expenditure", "Ratio of Inexperienced Teachers to 2+ Year Teachers", "Proportion of Teacher and Support Staff Salary Spending to Total Personnel Expenditure", "Ratio of Support Staff to Teachers")
+SumStats <- cbind(Mean, SD, Min, Max)
+colnames(SumStats) <- c("Mean", "SD", "Min", "Max")
+sumstatskable <- kable(SumStats, format = "html",
+      digits = 3,
+  align = "l",
+  caption = "Summary Statistics") 
+# save_kable(sumstatskable, file = "SumStatsTable.png")
+sumstatskable
+```
+```{r Student Summary Stats, echo = FALSE, eval = FALSE}
+mean(useData3$ETOTAL)
+sd(useData3$ETOTAL)
+range(useData3$ETOTAL)
+mean(useData3$TtlChronicAbsent)
+sd(useData3$TtlChronicAbsent)
+range(useData3$TtlChronicAbsent)
+mean(useData3$AbsentProp)
+sd(useData3$AbsentProp)
+range(useData3$AbsentProp)
+mean(useData3$PupilTeachRatio)
+sd(useData3$PupilTeachRatio)
+range(useData3$PupilTeachRatio)
+mean(useData3$EMinProp)
+sd(useData3$EMinProp)
+range(useData3$EMinProp)
+mean(useData3$frplProp)
+sd(useData3$frplProp)
+range(useData3$frplProp)
+mean(useData3$LEPProp)
+sd(useData3$LEPProp)
+range(useData3$LEPProp)
+```
+```{r Resource Summary Statistics, eval = FALSE, echo = FALSE}
+mean(useData3$AvgTeachSal)
+sd(useData3$AvgTeachSal)
+range(useData3$AvgTeachSal)
+mean(useData3$AvgTeachSalNorm)
+sd(useData3$AvgTeachSalNorm)
+range(useData3$AvgTeachSalNorm)
+mean(useData3$PPE)
+sd(useData3$PPE)
+range(useData3$PPE)
+mean(useData3$TeachInexp)
+sd(useData3$TeachInexp)
+range(useData3$TeachInexp)
+mean(useData3$TeachSupSalPropNorm)
+sd(useData3$TeachSupSalPropNorm)
+range(useData3$TeachSupSalPropNorm)
+mean(useData3$SupTeachRatio)
+sd(useData3$SupTeachRatio)
+range(useData3$SupTeachRatio)
+```
+
+#### Methodology
+```{r Train and Test Subsetting, echo = FALSE}
+set.seed(6350)
+ttobs <- length(useData3$ETOTAL)
+# ttobs
+selectobs <- (runif(ttobs) < 0.7)
+graphobs <- (runif(ttobs) < 0.05)
+trainset <- subset(useData3,selectobs)
+# trainset
+testset <- subset(useData3,(!selectobs))
+# testset
+graphset <- subset(useData3, graphobs)
+#graphset$SPED <- as.factor(graphset$SPED)
+#graphset$Magnet <- as.factor(graphset$Magnet)
+#graphset$Charter <- as.factor(graphset$Charter)
+#graphset$Alternative <- as.factor(graphset$Alternative)
+```
+**OLS**
+```{r Initial OLS Regression}
+absent1 <- lm(AbsentProp ~ AvgTeachSalNorm + TeachInexp + SPED + Alternative + Magnet + Charter + PPE + TeachSupSalPropNorm + ETOTAL + PupilTeachRatio + EMinProp + frplProp + LEPProp, data = useData3)
+summary(absent1)
+# stargazer(absent1, type = "text")
+plot(absent1)
+absentcoefs <- kable(summary(absent1)$coef, digits=3)
+# save_kable(absentcoefs, file = "AbsentOLSCoefs.png")
+```
+```{r OLS Plots, echo = FALSE}
+attach(graphset)
+# png(filename = "./EMinPropOLS.png")
+plot(AbsentProp ~ jitter(EMinProp, factor = 0.0), pch = 15, col = rgb(0.5, 0.8, 0, alpha = 0.8), ylim = c(0,1), xlim = c(0,1), xlab = "Minority Proportion", data = graphset)
+abspredict <- data.frame(AvgTeachSalNorm = 0.0015, TeachInexp = 0.5, SPED, Alternative, Magnet, Charter, PPE = 7500, ETOTAL = 250, PupilTeachRatio = 15, (EMinProp >= 0.2 & EMinProp <= 0.8), frplProp = 0.05, LEPProp = 0.1, TeachSupSalPropNorm = 0.05)
+abspredict$yhat <- predict(absent1, newdata = abspredict)
+lines(yhat ~ EMinProp, data = abspredict, col = "Purple" )
+legend("topleft", "Minority Regression", col = "Purple", lty = 1, bty = "n")
+# dev.off()
+detach()
+```
+```{r}
+attach(graphset)
+# png(filename = "./FRPLPropOLS.png")
+plot(AbsentProp ~ jitter(frplProp, factor = 0.0), pch = 15, col = rgb(0.5, 0.8, 0, alpha = 0.8), ylim = c(0,1), xlim = c(0,1), xlab="FRPL Prop", data = graphset)
+abspredictfrpl <- data.frame(AvgTeachSalNorm = 0.0015, TeachInexp = 0.5, SPED, Alternative, Magnet, Charter, PPE = 7500, ETOTAL = 250, PupilTeachRatio = 15, EMinProp = 0.5, (frplProp >= 0.1 & frplProp <= 0.9), LEPProp = 0.1, TeachSupSalPropNorm = 0.05)
+abspredictfrpl$yhat <- predict(absent1, newdata = abspredictfrpl)
+lines(yhat ~ frplProp, data = abspredictfrpl, col = "Blue")
+legend("topleft", "Free and Reduced Price Lunch RL", col = "Blue", lty = 1, bty = "n")
+# dev.off()
+detach()
+```
+```{r}
+attach(graphset)
+# png(filename = "./TeachInexpOLS.png")
+plot(AbsentProp ~ jitter(TeachInexp, factor = 0.0), pch = 15, col = rgb(0.5, 0.8, 0, alpha = 0.8), ylim = c(0,1), xlim = c(0,1), xlab="Inexperienced Teacher Proportion", data = graphset)
+abspredictinexp <- data.frame(AvgTeachSalNorm = 0.0015, (TeachInexp >= 0.05 & TeachInexp <= 1), SPED, Alternative, Magnet, Charter, PPE = 6500, ETOTAL = 250, PupilTeachRatio = 15, EMinProp = 0.5, frplProp = 0.05, LEPProp = 0.1, TeachSupSalPropNorm = 0.05)
+abspredictinexp$yhat <- predict(absent1, newdata = abspredictinexp)
+lines(yhat ~ TeachInexp, data = abspredictinexp, col = "Red")
+legend("topleft", "Teacher Inexperience Ration RL", col = "Red", lty = 1, bty = "n")
+# dev.off()
+detach()
+```
+
+**LASSO**
+```{r Standardize Data and Lasso Regression, echo = FALSE}
+dat_for_lasso <- data.frame(
+  useData3$AbsentProp,
+  useData3$AvgTeachSalNorm,
+  useData3$TeachInexp,
+  useData3$SPED,
+  useData3$Charter,
+  useData3$Magnet,
+  useData3$Alternative,
+  useData3$PPE,
+  useData3$TeachSupSalPropNorm,
+  useData3$ETOTAL,
+  useData3$PupilTeachRatio,
+  useData3$EMinProp,
+  useData3$frplProp,
+  useData3$LEPProp)
+names(dat_for_lasso) <- c("AbsentProp",
+                                 "AvgTeachSalNorm",
+                                 "TeachInexp",
+                                 "SPED",
+                                 "Charter",
+                                 "Magnet",
+                                 "Alternative",
+                                 "PPE",
+                                 "TeachSupSalPropNorm",
+                                 "ETOTAL",
+                                 "PupilTeachRatio",
+                                 "EMinProp",
+                                 "frplProp",
+                                 "LEPProp")
+require("standardize")
+set.seed(6350)
+NNLasso <- length(dat_for_lasso$AbsentProp)
+NNLasso
+randomlassoobs <- as.logical(runif(NNLasso) < 0.40)
+# summary(restrict_1)
+lassotrain <- subset(dat_for_lasso, randomlassoobs)
+lassotest <- subset(dat_for_lasso, !randomlassoobs)
+sobj <- standardize(AbsentProp ~ AvgTeachSalNorm + TeachInexp + SPED + Alternative + Magnet + Charter + PPE + TeachSupSalPropNorm + ETOTAL + PupilTeachRatio + EMinProp + frplProp + LEPProp, lassotrain, family = binomial)
+lassodatatest <- predict(sobj, lassotest)
+
+# Lasso
+# install.packages("glmnet")
+# install.packages("vip")
+require(vip)
+require(glmnet)
+model1_lasso <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$AbsentProp, alpha = 1)
+par(mar=c(4.5,4.5,1,4))
+plot(model1_lasso)
+vnat=coef(model1_lasso)
+vnat=vnat[-1,ncol(vnat)] 
+axis(4, at=vnat,line=-.5,label=names(sobj$data[,-1]),las=1,tick=FALSE, cex.axis=0.5) 
+plot(model1_lasso, xvar = "lambda")
+plot(model1_lasso, xvar = "dev", label = TRUE)
+print(model1_lasso)
+cvmodel1_lasso = cv.glmnet(data.matrix(sobj$data[,-1]),data.matrix(sobj$data$AbsentProp),alpha = 1) 
+cvmodel1_lasso$lambda.min
+plot(cvmodel1_lasso)
+log(cvmodel1_lasso$lambda.min)
+coef(cvmodel1_lasso, s = "lambda.min")
+# png(filename = "./LassoChart.png")
+vip(cvmodel1_lasso, num_features = 50, geom = "col")
+# dev.off()
+lassocoefs <- kable(vnat, digits=3)
+# save_kable(lassocoefs, file = "LassoCoefs.png")
+```
+```{r OLS Lasso Remove Varb, echo = FALSE}
+absentlassoremove <- lm(AbsentProp ~ AvgTeachSalNorm + TeachInexp + SPED + Alternative + PPE + TeachSupSalPropNorm + ETOTAL + PupilTeachRatio + EMinProp + frplProp + LEPProp, data = useData3)
+summary(absentlassoremove)
+# stargazer(absent1, type = "text")
+plot(absentlassoremove)
+absentremovecoefs <- kable(summary(absentlassoremove)$coef, digits=3)
+# save_kable(absentremovecoefs, file = "AbsentRemoveOLSCoefs.png")
+```
+```{r OLS Interactions, echo = FALSE}
+absentinteract <- lm(AbsentProp ~ (AvgTeachSalNorm*SPED) + (TeachInexp*SPED) + (PPE*SPED) + (TeachSupSalPropNorm*SPED) + (ETOTAL*SPED) + (PupilTeachRatio*SPED) + (EMinProp*SPED) + (frplProp*SPED) + (LEPProp*SPED) + (AvgTeachSalNorm*Alternative) + (TeachInexp*Alternative) + (PPE*Alternative) + (TeachSupSalPropNorm*Alternative) + (ETOTAL*Alternative) + (PupilTeachRatio*Alternative) + (EMinProp*Alternative) + (frplProp*Alternative) + (LEPProp*Alternative), data = useData3)
+summary(absentinteract)
+plot(absentinteract)
+absentinteractcoefs <- kable(summary(absentinteract)$coef, digits=3)
+# save_kable(absentinteractcoefs, file = "AbsentInteractOLSCoefs.png")
+# stargazer(absentinteract, type = "text")
+```
+#### Bibliography
