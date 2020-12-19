@@ -1240,7 +1240,9 @@ particular cohorts with an acceptable education experience?
 
 Here are some plots of Minority Proportion correlation, Free and Reduced
 Price Lunch Proportion correlation and Inexperience Teacher Ratio
-correlation. ![EMinPropOLS](./EMinPropOLS.png)
+correlation.
+
+![EMinPropOLS](./EMinPropOLS.png)
 
 ![FRPLPropOLS](./FRPLPropOLS.png)
 
@@ -1249,7 +1251,11 @@ correlation. ![EMinPropOLS](./EMinPropOLS.png)
 ![](FProjv2_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 ![](FProjv2_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
-**LASSO**
+**LASSO** The Lasso Model confirms the results of the initial OLS model.
+THe expenditure related teacher variables have the least impact on
+estimating the chronic absentee rate. School type remains interesting.
+The Magnet and Charter schools appear to have little impact on chronic
+absentee rates.
 
 <table>
 
@@ -1486,12 +1492,6 @@ LEPProp
 </table>
 
 ![LassoChart](./LassoChart.png)
-
-The Lasso Model confirms the results of the initial OLS model. THe
-expenditure related teacher variables have the least impact on
-estimating the chronic absentee rate. School type remains interesting.
-The Magnet and Charter schools appear to have little impact on chronic
-absentee rates.
 
 The second OLS model removes two of the school types, leaving the
 expenditure teacher variables so as not to change the equation
@@ -3141,6 +3141,7 @@ Racial/Ethnic Test Score Gaps. The American Journal of Sociology,
 United States Department of Education. (2019). Accessed December 16,
 2020, <https://www2.ed.gov/datastory/chronicabsenteeism.html#intro>
 
-**Data** CRDC (the EDFacts Supplement is included in the CRDC Download)
+**Data**  
+CRDC (the EDFacts Supplement is included in the CRDC Download)
 <https://www2.ed.gov/about/offices/list/ocr/docs/crdc-2017-18.html> CCD
 <https://nces.ed.gov/ccd/files.asp#Fiscal:2,LevelId:7,SchoolYearId:32,Page:1>

@@ -343,7 +343,8 @@ absentcoefs
 ```
 The initial OLS Regression demonstrates that the expenditure based teacher effect variables have a nonstatistical relationship with chronic absentee rates. The remaining variables, while demonstrating statistically significant correlations, generally have low correlations on chronic absenteeism. It is of interest that Special Education schools and Alternative schools have the largest correlation, both positive, on the rate of chronic absenteeism. Despite potentially having access to greater resources to help serve their students, these two results demonstrate the issues of endogeneity with assessing school resources - are the resources provided to the students to help improve their educational opportunities, or are added resources needed to provide particular cohorts with an acceptable education experience?
 
-Here are some plots of Minority Proportion correlation, Free and Reduced Price Lunch Proportion correlation and Inexperience Teacher Ratio correlation.
+Here are some plots of Minority Proportion correlation, Free and Reduced Price Lunch Proportion correlation and Inexperience Teacher Ratio correlation.  
+
 ![EMinPropOLS](./EMinPropOLS.png)  
 
 ![FRPLPropOLS](./FRPLPropOLS.png)  
@@ -383,6 +384,7 @@ detach()
 ```
 
 **LASSO**
+The Lasso Model confirms the results of the initial OLS model. THe expenditure related teacher variables have the least impact on estimating the chronic absentee rate. School type remains interesting. The Magnet and Charter schools appear to have little impact on chronic absentee rates.
 ```{r Standardize Data and Lasso Regression, echo = FALSE, include = FALSE}
 dat_for_lasso <- data.frame(
   useData3$AbsentProp,
@@ -452,9 +454,8 @@ lassocoefs <- kable(vnat, digits=3)
 ```{r echo = FALSE}
 lassocoefs
 ```
-![LassoChart](./LassoChart.png)
 
-The Lasso Model confirms the results of the initial OLS model. THe expenditure related teacher variables have the least impact on estimating the chronic absentee rate. School type remains interesting. The Magnet and Charter schools appear to have little impact on chronic absentee rates.
+![LassoChart](./LassoChart.png)
 
 The second OLS model removes two of the school types, leaving the expenditure teacher variables so as not to change the equation drastically.
 ```{r OLS Lasso Remove Varb, echo = FALSE, include = FALSE}
@@ -514,6 +515,6 @@ Reardon, S.F., Kalogrides, D., & Shores, K. (2019). The Geography of Racial/Ethn
 
 United States Department of Education. (2019). Accessed December 16, 2020, https://www2.ed.gov/datastory/chronicabsenteeism.html#intro
 
-**Data**
+**Data**  
 CRDC (the EDFacts Supplement is included in the CRDC Download) https://www2.ed.gov/about/offices/list/ocr/docs/crdc-2017-18.html
 CCD https://nces.ed.gov/ccd/files.asp#Fiscal:2,LevelId:7,SchoolYearId:32,Page:1
