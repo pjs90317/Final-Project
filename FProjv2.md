@@ -701,6 +701,8 @@ Lastly, an OLS regression with interactions on the remaining variables
 will be run to test the impact of school type on the remaining
 variables.
 
+#### Results
+
 **OLS**
 
 <table>
@@ -1223,6 +1225,26 @@ LEPProp
 
 </table>
 
+The initial OLS Regression demonstrates that the expenditure based
+teacher effect variables have a nonstatistical relationship with chronic
+absentee rates. The remaining variables, while demonstrating
+statistically significant correlations, generally have low correlations
+on chronic absenteeism. It is of interest that Special Education schools
+and Alternative schools have the largest correlation, both positive, on
+the rate of chronic absenteeism. Despite potentially having access to
+greater resources to help serve their students, these two results
+demonstrate the issues of endogeneity with assessing school resources -
+are the resources provided to the students to help improve their
+educational opportunities, or are added resources needed to provide
+particular cohorts with an acceptable education experience?
+
+Here are some plots of Minority Proportion correlation, Free and Reduced
+Price Lunch Proportion correlation and Inexperience Teacher Ratio
+correlation. ![EMinPropOLS](./EMinPropOLS.png)
+
+![FRPLPropOLS](./FRPLPropOLS.png)
+
+![TeachInexpOLS](./TeachInexpOLS.png)
 ![](FProjv2_files/figure-gfm/OLS%20Plots-1.png)<!-- -->
 ![](FProjv2_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 ![](FProjv2_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
@@ -1462,6 +1484,18 @@ LEPProp
 </tbody>
 
 </table>
+
+![LassoChart](./LassoChart.png)
+
+The Lasso Model confirms the results of the initial OLS model. THe
+expenditure related teacher variables have the least impact on
+estimating the chronic absentee rate. School type remains interesting.
+The Magnet and Charter schools appear to have little impact on chronic
+absentee rates.
+
+The second OLS model removes two of the school types, leaving the
+expenditure teacher variables so as not to change the equation
+drastically.
 
 <table>
 
@@ -1914,6 +1948,18 @@ LEPProp
 </tbody>
 
 </table>
+
+Having remove the Magnet and Charter school types, expenditure teacher
+variables still have a nonstatistical relationship to chronic absentee
+rates. The normalized average teacher salary has less of a correlation
+at even less significance. Teacher Inexperience ratio increased its
+level of correlation by 1.5 standard deviations. All other variables
+remained constant.
+
+To test the impact of school type against the remaining variables, the
+last OLS regression interacts the Special Education and Alternative
+school dummary variables against the student and teacher effects
+variables.
 
 <table>
 
@@ -2979,6 +3025,64 @@ LEPProp:Alternative1
 
 </table>
 
+The interaction model demonstrates large changes in the correlation of
+the normalized expenditure variables Average Teacher Salary and Teacher
+and Support Staff Salary as a Proportion of Personnel Expenditure, when
+they are interacted with both Special Education and Alternative school
+type variables. Free Lunch Eligible Proportion and Limited English
+Proportion variables also change significantly when interacted with the
+Special Education variable, both taking on insignificant p-values,
+suggesting that Special Education schools may have cohorts with low
+proportions of free lunch eligible and limited English proficient
+students. We see movements in the same direction of those two variables
+when interacted with the Alternative school variable, though the
+movements are to the opposite degree. Both coefficients remain
+statistically significant. The other variables in the model do not
+change significantly. This suggests that Special Education and
+Alternative schools have greater impacts on chronic absenteeism due to
+expenditure factors than other schools. Specifically, the coefficients
+suggests that increased spending on Support Staff is beneficial, given
+that Average Teacher Salary has positive correlation with the interacted
+Special Education and Alternative school variables while the Proportion
+of Teacher and Support Staff Salary to Personnel Expenditure has a
+negative correlation. The implication is that support staff members can
+provide better outcomes for students in these environments than just
+regular teachers.
+
+#### Conclusion
+
+The analysis of school resources in these models, in terms of
+expenditure and non-expenditure measures, implies that there is little
+correlation with rates of chronic absenteeism. Student factors have more
+statistically significant relationships with rates of chronic
+absenteeism but the values of correlation coefficients appear to small
+to be real world practical. There are issues of endogeneity within the
+line of inquiry. The first regards proportions of students in poverty.
+Cohorts with higher proportions of children in poverty, here accounted
+for through the free lunch program variable, could have higher rates of
+Limited English Proficiency students. They may also face less engagement
+from other members of their cohort and the teacher body, presenting
+issues of disengagement, hostility and lack of support prompting them to
+be less likely to go to school. Similarly, accounting for Teacher
+Inexperience Ratio is a less than ideal measure for teacher quality.
+Teachers with more experience do have advantages for students but
+experience does not always translate to quality.
+
+It would be an ideal outcome for policy makers to be presented with the
+chance to put money towards an initiative or program and know that it
+will lead to a good outcome. With chronic absenteeism, which can be an
+indicator for later educational outcomes, this does not appear to be the
+case. There are too many confounding variables outside the realm of
+school resources to have an instantaneous impact on reducing rates.
+Providing support staff, engaging parents and building positive learning
+environments is but one piece of the education puzzle. Chronic
+absenteeism appears to be more influenced by background factors. Given
+the impacts that chronic absenteeism can have on an individual’s
+learning an education, to the extent of damaging matriculation
+opportunities, it would be well worth pursuing programs within poor and
+minority communities to reduce the 16% of American school students
+chronically absent each year (U.S.Department of Education 2019).
+
 #### Bibliography
 
 Balfanz, R. (2016). Missing school matters. The Phi Delta Kappan, 98(2),
@@ -2988,6 +3092,7 @@ Balfanz, R. (2016). Missing school matters. The Phi Delta Kappan, 98(2),
 Branham, D. (2004), The Wise Man Builds His House Upon the Rock: The
 Effects of Inadequate School Building Infrastructure on Student
 Attendance. Social Science Quarterly, 85: 1112-1128.
+<https://doi.org/10.1111/j.0038-4941.2004.00266.x>
 
 Gershenson, S. (2016). Linking Teacher Quality, Student Attendance, and
 Student Achievement. Education Finance and Policy 2016 11:2, 125-149.
@@ -3037,6 +3142,5 @@ United States Department of Education. (2019). Accessed December 16,
 2020, <https://www2.ed.gov/datastory/chronicabsenteeism.html#intro>
 
 **Data** CRDC (the EDFacts Supplement is included in the CRDC Download)
-- <https://www2.ed.gov/about/offices/list/ocr/docs/crdc-2017-18.html>
-CCD -
+<https://www2.ed.gov/about/offices/list/ocr/docs/crdc-2017-18.html> CCD
 <https://nces.ed.gov/ccd/files.asp#Fiscal:2,LevelId:7,SchoolYearId:32,Page:1>
