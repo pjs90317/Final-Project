@@ -205,9 +205,13 @@ useData3$TeachSupSalPropNorm <- norm_varb(useData3$TeachSupSalProp)
 # summary(useData3)
 # save(useData3, file="CleanedData.RData")
 ```
-### Introduction
+#### Introduction
+Statistical research on education outcomes commonly hones in test scores and graduation rates, outcomes used by the government and academia alike as broad metrics for institutional success. The research provides insights for policy directions to manage issues including outcome gaps due to race and ethnicity differences (Reardon et al. 2016), socioeconomic status differences (Owens 2010) and overall student achievement levels(Grosskopf et al. 2013). There is a subsection of the literature that focuses on the impact and efficiency of educational resources. Predominantly this research has sought to find correlation between resource availability or allocation and educational attainment.
+
+This paper uses the U.s. Department of Education 2017-18 Civil Rights Data Collection, National Center for Education Statistics Common Core of Data 2017-18 Lunch Program Eligibility Survey and the U.s. Department of Education EDFacts Data Set 2017-18 Chronic Absenteeism Table (DG 814) to test for a correlation between school resources and the rate of chronic absenteeism in schools. Chronic absenteeism is defined as missing 15 or more days of school (U.S. Department of Education, 2019). Chronic absenteeism can have negative impacts on educational achievements across all levels of education (Balfanz 2016).
 
 #### Literature Review
+The statistical literature on education outcomes has generally focused on assessment scores and graduation rates as functions of cost and socioeconomic inputs.
 
 #### Data
 ```{r Student Summary Statistics, echo = FALSE}
@@ -301,7 +305,6 @@ absentcoefs <- kable(summary(absent1)$coef, digits=3)
 absentcoefs
 ```
 ```{r OLS Plots, echo = FALSE}
-options(warn = -1)
 # png(filename = "./EMinPropOLS.png")
 plot(AbsentProp ~ jitter(EMinProp, factor = 0.0), pch = 15, col = rgb(0.5, 0.8, 0, alpha = 0.8), ylim = c(0,1), xlim = c(0,1), xlab = "Minority Proportion", data = graphset)
 attach(graphset)
@@ -313,7 +316,6 @@ legend("topleft", "Minority Regression", col = "Purple", lty = 1, bty = "n")
 detach()
 ```
 ```{r echo = FALSE}
-options(warn = -1)
 # png(filename = "./FRPLPropOLS.png")
 plot(AbsentProp ~ jitter(frplProp, factor = 0.0), pch = 15, col = rgb(0.5, 0.8, 0, alpha = 0.8), ylim = c(0,1), xlim = c(0,1), xlab="FRPL Prop", data = graphset)
 attach(graphset)
@@ -325,7 +327,6 @@ legend("topleft", "Free and Reduced Price Lunch RL", col = "Blue", lty = 1, bty 
 detach()
 ```
 ```{r echo = FALSE}
-options(warn = -1)
 # png(filename = "./TeachInexpOLS.png")
 plot(AbsentProp ~ jitter(TeachInexp, factor = 0.0), pch = 15, col = rgb(0.5, 0.8, 0, alpha = 0.8), ylim = c(0,1), xlim = c(0,1), xlab="Inexperienced Teacher Proportion", data = graphset)
 attach(graphset)
@@ -403,6 +404,9 @@ vip(cvmodel1_lasso, num_features = 50, geom = "col")
 lassocoefs <- kable(vnat, digits=3)
 # save_kable(lassocoefs, file = "LassoCoefs.png")
 ```
+```{r echo = FALSE}
+lassocoefs
+```
 ```{r OLS Lasso Remove Varb, echo = FALSE, include = FALSE}
 absentlassoremove <- lm(AbsentProp ~ AvgTeachSalNorm + TeachInexp + SPED + Alternative + PPE + TeachSupSalPropNorm + ETOTAL + PupilTeachRatio + EMinProp + frplProp + LEPProp, data = useData3)
 summary(absentlassoremove)
@@ -410,6 +414,9 @@ summary(absentlassoremove)
 plot(absentlassoremove)
 absentremovecoefs <- kable(summary(absentlassoremove)$coef, digits=3)
 # save_kable(absentremovecoefs, file = "AbsentRemoveOLSCoefs.png")
+```
+```{r echo = FALSE}
+absentremovecoefs
 ```
 ```{r OLS Interactions, echo = FALSE, include = FALSE}
 absentinteract <- lm(AbsentProp ~ (AvgTeachSalNorm*SPED) + (TeachInexp*SPED) + (PPE*SPED) + (TeachSupSalPropNorm*SPED) + (ETOTAL*SPED) + (PupilTeachRatio*SPED) + (EMinProp*SPED) + (frplProp*SPED) + (LEPProp*SPED) + (AvgTeachSalNorm*Alternative) + (TeachInexp*Alternative) + (PPE*Alternative) + (TeachSupSalPropNorm*Alternative) + (ETOTAL*Alternative) + (PupilTeachRatio*Alternative) + (EMinProp*Alternative) + (frplProp*Alternative) + (LEPProp*Alternative), data = useData3)
@@ -419,4 +426,16 @@ absentinteractcoefs <- kable(summary(absentinteract)$coef, digits=3)
 # save_kable(absentinteractcoefs, file = "AbsentInteractOLSCoefs.png")
 # stargazer(absentinteract, type = "text")
 ```
+```{r echo = FALSE}
+absentinteractcoefs
+```
 #### Bibliography
+Balfanz, R. (2016). Missing school matters. The Phi Delta Kappan, 98(2), 8-13. Retrieved December 1, 2020, from http://www.jstor.org/stable/24893461
+
+Grosskopf, S., Hayes, K., Taylor, L.L. et al. (2015). Centralized or decentralized control of school resources? A network model. J Prod Anal 43, 139–150. Accessed December 1, 2020, https://doi.org/10.1007/s11123-013-0379-2
+
+Owens, A. (2010). Neighborhoods and Schools as Competing and Reinforcing Contexts for Educational Attainment. Sociology of Education, 83(4), 287-311. Retrieved December 4, 2020, from http://www.jstor.org/stable/25746205
+
+Reardon, S.F., Kalogrides, D., & Shores, K. (2019). The Geography of Racial/Ethnic Test Score Gaps. The American Journal of Sociology, 124(4). Accessed December 1, 2020, https://cepa.stanford.edu/sites/default/files/wp16-10-v201604.pdf
+
+United States Department of Education. (2019). Accessed December 16, 2020, https://www2.ed.gov/datastory/chronicabsenteeism.html#intro
