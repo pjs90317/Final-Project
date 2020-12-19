@@ -383,7 +383,7 @@ legend("topleft", "Teacher Inexperience Ration RL", col = "Red", lty = 1, bty = 
 detach()
 ```
 
-**LASSO**
+**LASSO**  
 The Lasso Model confirms the results of the initial OLS model. THe expenditure related teacher variables have the least impact on estimating the chronic absentee rate. School type remains interesting. The Magnet and Charter schools appear to have little impact on chronic absentee rates.
 ```{r Standardize Data and Lasso Regression, echo = FALSE, include = FALSE}
 dat_for_lasso <- data.frame(
@@ -454,7 +454,7 @@ lassocoefs <- kable(vnat, digits=3)
 ```{r echo = FALSE}
 lassocoefs
 ```
-
+*Lasso Importance Chart*  
 ![LassoChart](./LassoChart.png)
 
 The second OLS model removes two of the school types, leaving the expenditure teacher variables so as not to change the equation drastically.

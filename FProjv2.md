@@ -1251,8 +1251,9 @@ correlation.
 ![](FProjv2_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 ![](FProjv2_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
-**LASSO** The Lasso Model confirms the results of the initial OLS model.
-THe expenditure related teacher variables have the least impact on
+**LASSO**  
+The Lasso Model confirms the results of the initial OLS model. THe
+expenditure related teacher variables have the least impact on
 estimating the chronic absentee rate. School type remains interesting.
 The Magnet and Charter schools appear to have little impact on chronic
 absentee rates.
@@ -1491,6 +1492,7 @@ LEPProp
 
 </table>
 
+*Lasso Importance Chart*  
 ![LassoChart](./LassoChart.png)
 
 The second OLS model removes two of the school types, leaving the
